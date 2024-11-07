@@ -1,0 +1,21 @@
+{
+	"name": "umcnodejsrepo",
+	"type": "module",
+	"version": "1.0.0",
+	"description": "umc study",
+	"main": "index.js",
+	"scripts": {
+		"test": "",
+		"start": "node src/index.js",
+		"dev": "nodemon --exec node src/index.js"
+	},
+	"author": "",
+	"license": "MIT",
+	"dependencies": {
+		"cors": "^2.8.5",
+		"dotenv": "^16.4.5",
+		"express": "^5.0.0",
+		"http-status-codes": "^2.3.0",
+		"mysql2": "^3.11.4"
+	}
+}
