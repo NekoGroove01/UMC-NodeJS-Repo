@@ -30,4 +30,12 @@ export class ReviewService {
 		const review = await this.reviewRepository.createReview(reviewData);
 		return review;
 	}
+
+	async getReviewsByUserId(userId) {
+		const reviews = await this.reviewRepository.getReviewsByuserId(userId);
+		if (reviews.length === 0) {
+			throw new Error("Reviews not found");
+		}
+		return reviews;
+	}
 }

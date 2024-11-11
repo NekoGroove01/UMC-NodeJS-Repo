@@ -10,13 +10,13 @@ export const createMissionDTO = (body) => {
 
 export const missionResponseDTO = (mission) => {
 	return {
-		missionId: mission.mission_id,
-		storeId: mission.store_id,
-		description: mission.mission_description,
+		missionId: mission.missionId,
+		storeId: mission.storeId,
+		description: mission.missionDescription,
 		points: mission.points,
-		startDate: mission.start_date,
-		endDate: mission.end_date,
-		isActive: mission.is_active,
-		createdAt: mission.created_at,
+		startDate: mission.startDate,
+		endDate: mission.endDate,
+		isActive: mission.isActive,
+		createdAt: mission.createdAt,
 	};
 };

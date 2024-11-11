@@ -1,71 +1,84 @@
-import { pool } from "../db.config.js";
+import { prisma } from "../db.config.js";
 
 export class MissionRepository {
 	async checkStoreExists(storeId) {
-		const [rows] = await pool.query(
-			"SELECT store_id FROM stores WHERE store_id = ? AND is_active = TRUE",
-			[storeId]
-		);
-		return rows.length > 0;
+		const store = await prisma.store.findFirst({
+			where: {
+				id: storeId, // store_id가 아닌 id 사용
+				isActive: true,
+			},
+		});
+		return !!store;
 	}
 
 	async getActiveMissionCount(storeId) {
-		const [rows] = await pool.query(
-			`SELECT COUNT(*) as count 
-       FROM missions 
-       WHERE store_id = ? AND is_active = TRUE 
-       AND (end_date IS NULL OR end_date > NOW())`,
-			[storeId]
-		);
-		return rows[0].count;
+		const count = await prisma.mission.count({
+			where: {
+				storeId: storeId,
+				isActive: true,
+				OR: [{ endDate: null }, { endDate: { gt: new Date() } }],
+			},
+		});
+		return count;
 	}
 
 	async createMission(missionData) {
-		const [result] = await pool.query(
-			`INSERT INTO missions 
-       (store_id, mission_description, points, start_date, end_date)
-       VALUES (?, ?, ?, ?, ?)`,
-			[
-				missionData.storeId,
-				missionData.description,
-				missionData.points,
-				missionData.startDate,
-				missionData.endDate,
-			]
-		);
-
-		const [newMission] = await pool.query(
-			"SELECT * FROM missions WHERE mission_id = ?",
-			[result.insertId]
-		);
-
-		return newMission[0];
+		const mission = prisma.missions.create({
+			data: missionData,
+		});
+		return mission;
 	}
 
 	async createNotification(storeId) {
-		// Notify users who have previously interacted with the store
-		const [users] = await pool.query(
-			`SELECT DISTINCT u.user_id 
-       FROM users u 
-       LEFT JOIN reviews r ON u.user_id = r.user_id 
-       WHERE r.store_id = ?`,
-			[storeId]
-		);
+		const users = await prisma.user.findMany({
+			where: {
+				reviews: {
+					some: {
+						storeId: storeId,
+					},
+				},
+			},
+			select: {
+				id: true,
+			},
+		});
 
-		// Bulk insert notifications
+		// Prepare notification data
 		if (users.length > 0) {
-			const notifications = users.map((user) => [
-				user.user_id,
-				"new_mission",
-				"새로운 미션이 등록되었습니다! 지금 확인해보세요.",
-			]);
+			const notifications = users.map((user) => ({
+				userId: user.id,
+				type: "new_mission",
+				message: "새로운 미션이 등록되었습니다! 지금 확인해보세요.",
+			}));
 
-			await pool.query(
-				`INSERT INTO notifications 
-         (user_id, notification_type, content)
-         VALUES ?`,
-				[notifications]
-			);
+			// Bulk insert notifications
+			await prisma.notification.createMany({
+				data: notifications,
+			});
 		}
+	}
+
+	async getMissionsByStoreId(storeId) {
+		const missions = await prisma.mission.findMany({
+			where: {
+				storeId: storeId,
+				isActive: true,
+				OR: [{ endDate: null }, { endDate: { gt: new Date() } }],
+			},
+		});
+		return missions;
+	}
+
+	async getMissionsByUserId(userId) {
+		const missions = await prisma.mission.findMany({
+			where: {
+				userMissions: {
+					some: {
+						userId: Number(userId),
+					},
+				},
+			},
+		});
+		return missions;
 	}
 }

@@ -22,19 +22,27 @@ export class MissionService {
 			throw new Error("End date must be after start date");
 		}
 
-		// Check active mission count (Optional: limit the number of active missions per store)
-		const activeMissionCount =
-			await this.missionRepository.getActiveMissionCount(missionData.storeId);
-		if (activeMissionCount >= 5) {
-			// 예시: 가게당 최대 5개의 활성 미션으로 제한
-			throw new Error(
-				"Store has reached the maximum number of active missions"
-			);
-		}
-
 		// Create mission
 		const mission = await this.missionRepository.createMission(missionData);
 
 		return mission;
+	}
+
+	async getMissionsByStoreId(storeId) {
+		const missions = await this.missionRepository.getMissionsByStoreId(storeId);
+
+		if (missions.length < 1) {
+			throw new Error("Missions not found");
+		}
+		return missions;
+	}
+
+	async getMissionsByUserId(userId) {
+		const missions = await this.missionRepository.getMissionsByUserId(userId);
+		if (missions.length < 1) {
+			throw new Error("Missions not found");
+		}
+
+		return missions;
 	}
 }
