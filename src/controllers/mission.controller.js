@@ -5,60 +5,46 @@ import { createMissionDTO, missionResponseDTO } from "../dtos/mission.dto.js";
 const missionRepository = new MissionRepository();
 const missionService = new MissionService(missionRepository);
 
-export const handleCreateMission = async (req, res) => {
+export const handleCreateMission = async (req, res, next) => {
 	try {
 		const missionData = createMissionDTO(req.body);
 
 		const mission = await missionService.createMission(missionData);
 
-		res.status(201).json({
-			success: true,
-			data: missionResponseDTO(mission),
-		});
+		res.status(201).success(missionResponseDTO(mission));
 	} catch (error) {
 		console.error("Error creating mission:", error);
 
-		res.status(error.message.includes("not found") ? 404 : 400).json({
-			success: false,
-			message: error.message,
-		});
+		next(error);
 	}
 };
 
-export const handleGetMissionsByStoreId = async (req, res) => {
+export const handleGetMissionsByStoreId = async (req, res, next) => {
 	try {
 		const missions = await missionService.getMissionsByStoreId(
 			req.query.storeId
 		);
 
-		res.status(200).json({
-			success: true,
-			data: missions.map((mission) => missionResponseDTO(mission)),
-		});
+		res
+			.status(200)
+			.success(missions.map((mission) => missionResponseDTO(mission)));
 	} catch (error) {
 		console.error("Error getting missions:", error);
 
-		res.status(error.message.includes("not found") ? 404 : 400).json({
-			success: false,
-			message: error.message,
-		});
+		next(error);
 	}
 };
 
-export const handleGetMissionByUserId = async (req, res) => {
+export const handleGetMissionByUserId = async (req, res, next) => {
 	try {
 		const missions = await missionService.getMissionsByUserId(req.query.userId);
 
-		res.status(200).json({
-			success: true,
-			data: missions.map((mission) => missionResponseDTO(mission)),
-		});
+		res
+			.status(200)
+			.success(missions.map((mission) => missionResponseDTO(mission)));
 	} catch (error) {
 		console.error("Error getting missions:", error);
 
-		res.status(error.message.includes("not found") ? 404 : 400).json({
-			success: false,
-			message: error.message,
-		});
+		next(error);
 	}
 };

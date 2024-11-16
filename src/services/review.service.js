@@ -1,3 +1,5 @@
+import { BadRequestError, ConflictError, NotFoundError } from "../error.js";
+
 export class ReviewService {
 	constructor(reviewRepository) {
 		this.reviewRepository = reviewRepository;
@@ -9,7 +11,7 @@ export class ReviewService {
 			reviewData.storeId
 		);
 		if (!storeExists) {
-			throw new Error("Store not found or inactive");
+			throw new NotFoundError("Store not found");
 		}
 
 		// Check for existing review
@@ -18,12 +20,12 @@ export class ReviewService {
 			reviewData.storeId
 		);
 		if (hasExistingReview) {
-			throw new Error("User has already reviewed this store");
+			throw new ConflictError("Review already exists");
 		}
 
 		// Validate rating
 		if (reviewData.rating < 1 || reviewData.rating > 5) {
-			throw new Error("Rating must be between 1 and 5");
+			throw new BadRequestError("Rating must be between 1 and 5");
 		}
 
 		// Create review
@@ -34,7 +36,7 @@ export class ReviewService {
 	async getReviewsByUserId(userId) {
 		const reviews = await this.reviewRepository.getReviewsByuserId(userId);
 		if (reviews.length === 0) {
-			throw new Error("Reviews not found");
+			throw new NotFoundError("Reviews not found");
 		}
 		return reviews;
 	}

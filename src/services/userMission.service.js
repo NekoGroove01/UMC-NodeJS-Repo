@@ -1,3 +1,5 @@
+import { NotFoundError, ValidationError } from "../error.js";
+
 export class UserMissionService {
 	constructor(userMissionRepository) {
 		this.userMissionRepository = userMissionRepository;
@@ -9,7 +11,7 @@ export class UserMissionService {
 			userMissionData.missionId
 		);
 		if (!mission) {
-			throw new Error("Mission not found or inactive");
+			throw new NotFoundError("Mission is not found.");
 		}
 
 		// Check for existing challenge
@@ -21,11 +23,11 @@ export class UserMissionService {
 
 		if (existingChallenge) {
 			if (existingChallenge.status === "ongoing") {
-				throw new Error("이미 도전 중인 미션입니다.");
+				throw new ValidationError("Challenge already exists.");
 			} else if (existingChallenge.status === "completed") {
-				throw new Error("이미 완료한 미션입니다.");
+				throw new ValidationError("Challenge already completed.");
 			} else if (existingChallenge.status === "reviewed") {
-				throw new Error("이미 리뷰까지 완료한 미션입니다.");
+				throw new ValidationError("Challenge already reviewed.");
 			}
 		}
 

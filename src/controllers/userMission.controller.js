@@ -8,7 +8,7 @@ import {
 const userMissionRepository = new UserMissionRepository();
 const userMissionService = new UserMissionService(userMissionRepository);
 
-export const handleCreateUserMission = async (req, res) => {
+export const handleCreateUserMission = async (req, res, next) => {
 	try {
 		const userMissionData = createUserMissionDTO(req.body);
 
@@ -16,16 +16,10 @@ export const handleCreateUserMission = async (req, res) => {
 			userMissionData
 		);
 
-		res.status(201).json({
-			success: true,
-			data: userMissionResponseDTO(userMission),
-		});
+		res.status(201).success(userMissionResponseDTO(userMission));
 	} catch (error) {
 		console.error("Error creating user mission:", error);
 
-		res.status(error.message.includes("not found") ? 404 : 400).json({
-			success: false,
-			message: error.message,
-		});
+		next(error);
 	}
 };

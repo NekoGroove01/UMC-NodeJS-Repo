@@ -1,3 +1,5 @@
+import { BadRequestError, NotFoundError } from "../error.js";
+
 export class MissionService {
 	constructor(missionRepository) {
 		this.missionRepository = missionRepository;
@@ -9,17 +11,17 @@ export class MissionService {
 			missionData.storeId
 		);
 		if (!storeExists) {
-			throw new Error("Store not found or inactive");
+			throw new NotFoundError("Store not found");
 		}
 
 		// Validate points
 		if (missionData.points < 0) {
-			throw new Error("Points must be a positive number");
+			throw new BadRequestError("Points must be a positive number");
 		}
 
 		// Validate dates
 		if (missionData.endDate && missionData.endDate < missionData.startDate) {
-			throw new Error("End date must be after start date");
+			throw new BadRequestError("End date must be after start date");
 		}
 
 		// Create mission
@@ -32,7 +34,7 @@ export class MissionService {
 		const missions = await this.missionRepository.getMissionsByStoreId(storeId);
 
 		if (missions.length < 1) {
-			throw new Error("Missions not found");
+			throw new NotFoundError("Missions not found");
 		}
 		return missions;
 	}
@@ -40,7 +42,7 @@ export class MissionService {
 	async getMissionsByUserId(userId) {
 		const missions = await this.missionRepository.getMissionsByUserId(userId);
 		if (missions.length < 1) {
-			throw new Error("Missions not found");
+			throw new NotFoundError("Missions not found");
 		}
 
 		return missions;
