@@ -17,6 +17,15 @@ export const getUser = async (userId) => {
 	return user;
 };
 
+// 사용자 정보 업데이트
+export const updateUser = async (userId, data) => {
+	const updated = await prisma.user.update({
+		where: { id: Number(userId) },
+		data: data,
+	});
+	return updated;
+};
+
 // 음식 선호 카테고리 매핑
 export const setPreference = async (userId, foodCategoryId) => {
 	await prisma.userFavorCategory.create({
